@@ -9,6 +9,7 @@ Steps (each script can also be run on its own from the repository root with PYTH
   1b src/prelinkage.py        examination of records and candidate pairs     -> results/prelink_*, bands_and_strata, headroom
   1c src/model_check.py       fitted-model parameters and calibration        -> results/model_parameters.csv, figures/figS2
   1d src/ambiguity_check.py   what ambiguity levels capture under this model  -> results/ambiguity_*.csv, ambiguity_check.json
+  1e src/person_level.py      pairwise against person-level quality (threshold 0.5) -> results/person_level*.{json,csv}
   2  src/estimator_check.py   design-weighted vs pooled estimators           -> results/estimator_check*.csv
   3  src/evaluate.py compare  all designs at 1,000 / 10,000 pairs, 5%, 10%   -> results/compare_*.csv
   4  src/evaluate.py sens     number of strata; reviewer error               -> results/sensitivity*.csv
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     step("src/prelinkage.py")
     step("src/model_check.py")
     step("src/ambiguity_check.py")
+    step("src/person_level.py")
     step("src/estimator_check.py", R(50))
     for b in ("1000", "10000", "5pct", "10pct"):
         step("src/evaluate.py", "compare", b, R(300))

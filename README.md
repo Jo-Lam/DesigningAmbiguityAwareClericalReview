@@ -29,7 +29,8 @@ theoretical standard errors in `headroom.csv` (Table 3).
 | 1 | `src/score_pairs.py` | Fitted Splink model (`results/model.json`) and scored candidate pairs (`data/pairs_raw.parquet`, not tracked) |
 | 1b | `src/prelinkage.py` | Examination of records and candidate pairs: match-key ambiguity, records per person, blocking recall, bands and strata, ambiguity levels, perplexity by true duplicates, within-band variance explained and theoretical standard errors (`headroom.csv`) |
 | 1c | `src/model_check.py` | Model parameters, calibration by band and by band × ambiguity, largest patterns in band 6, Supplementary Figure S1 |
-| 1d | `src/ambiguity_check.py` | Ambiguity levels: match rate, calibration gap, false and missed matches by level; within-band variance explained; truth-based diagnostic separating confusability with other people from the number of a person's records |
+| 1d | `src/ambiguity_check.py` | Ambiguity levels: true-match proportion, calibration gap, false and missed matches by level; within-band variance explained; truth-based diagnostic separating confusability with other people from the number of a person's records |
+| 1e | `src/person_level.py` | Pairwise against person-level quality: links joined into clusters, people split and merged, share of true matching pairs held by people with many records (Discussion) |
 | 2 | `src/estimator_check.py` | Design-weighted against pooled-within-band estimates (Supplementary Note 1, Supplementary Figure S2) |
 | 3 | `src/evaluate.py compare <budget>` | All designs at 1,000 pairs, 10,000 pairs, 5% and 10% of candidate pairs; 300 replicates |
 | 4 | `src/evaluate.py sens` | Maximum number of strata; reviewer error; 200 replicates |
