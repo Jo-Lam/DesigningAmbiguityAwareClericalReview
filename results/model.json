@@ -1,0 +1,298 @@
+{
+    "link_type": "dedupe_only",
+    "probability_two_random_records_match": 0.00013582694460587586,
+    "retain_matching_columns": true,
+    "retain_intermediate_calculation_columns": true,
+    "additional_columns_to_retain": [
+        "gender",
+        "cluster"
+    ],
+    "sql_dialect": "duckdb",
+    "linker_uid": "6l8u671w",
+    "em_convergence": 0.0001,
+    "max_iterations": 25,
+    "bayes_factor_column_prefix": "bf_",
+    "term_frequency_adjustment_column_prefix": "tf_",
+    "comparison_vector_value_column_prefix": "gamma_",
+    "unique_id_column_name": "unique_id",
+    "source_dataset_column_name": "source_dataset",
+    "blocking_rules_to_generate_predictions": [
+        {
+            "blocking_rule": "(SUBSTRING(l.first_name, 1, 3) = SUBSTRING(r.first_name, 1, 3)) AND (SUBSTRING(l.surname, 1, 4) = SUBSTRING(r.surname, 1, 4))",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(l.\"surname\" = r.\"surname\") AND (l.\"dob\" = r.\"dob\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(l.\"first_name\" = r.\"first_name\") AND (l.\"dob\" = r.\"dob\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(l.\"postcode_fake\" = r.\"postcode_fake\") AND (l.\"first_name\" = r.\"first_name\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(l.\"postcode_fake\" = r.\"postcode_fake\") AND (l.\"surname\" = r.\"surname\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(l.\"dob\" = r.\"dob\") AND (l.\"birth_place\" = r.\"birth_place\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(SUBSTRING(l.postcode_fake, 1, 3) = SUBSTRING(r.postcode_fake, 1, 3)) AND (l.\"dob\" = r.\"dob\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(SUBSTRING(l.postcode_fake, 1, 3) = SUBSTRING(r.postcode_fake, 1, 3)) AND (l.\"first_name\" = r.\"first_name\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(SUBSTRING(l.postcode_fake, 1, 3) = SUBSTRING(r.postcode_fake, 1, 3)) AND (l.\"surname\" = r.\"surname\")",
+            "sql_dialect": "duckdb"
+        },
+        {
+            "blocking_rule": "(SUBSTRING(l.first_name, 1, 2) = SUBSTRING(r.first_name, 1, 2)) AND (SUBSTRING(l.surname, 1, 2) = SUBSTRING(r.surname, 1, 2)) AND (SUBSTRING(l.dob, 1, 4) = SUBSTRING(r.dob, 1, 4))",
+            "sql_dialect": "duckdb"
+        }
+    ],
+    "comparisons": [
+        {
+            "output_column_name": "first_name_surname",
+            "comparison_levels": [
+                {
+                    "sql_condition": "(\"first_name_l\" IS NULL OR \"first_name_r\" IS NULL) AND (\"surname_l\" IS NULL OR \"surname_r\" IS NULL)",
+                    "label_for_charts": "Both names missing",
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "is_null_level": true
+                },
+                {
+                    "sql_condition": "\"first_name_surname_concat_l\" = \"first_name_surname_concat_r\"",
+                    "label_for_charts": "Exact full name",
+                    "m_probability": 0.4025831560996427,
+                    "u_probability": 0.0002598493167577852,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "tf_adjustment_column": "first_name_surname_concat",
+                    "tf_adjustment_weight": 1.0
+                },
+                {
+                    "sql_condition": "(jaro_winkler_similarity(\"first_name_l\", \"first_name_r\") >= 0.88) AND (jaro_winkler_similarity(\"surname_l\", \"surname_r\") >= 0.88)",
+                    "label_for_charts": "Both names Jaro-Winkler >= 0.88",
+                    "m_probability": 0.1590962587117777,
+                    "u_probability": 7.516545207908814e-05,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "\"surname_l\" = \"surname_r\"",
+                    "label_for_charts": "Exact surname only",
+                    "m_probability": 0.1572763035755262,
+                    "u_probability": 0.0003632018133665314,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "tf_adjustment_column": "surname",
+                    "tf_adjustment_weight": 1.0
+                },
+                {
+                    "sql_condition": "\"first_name_l\" = \"first_name_r\"",
+                    "label_for_charts": "Exact forename only",
+                    "m_probability": 0.0565328079836598,
+                    "u_probability": 0.012631025714805833,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "tf_adjustment_column": "first_name",
+                    "tf_adjustment_weight": 1.0
+                },
+                {
+                    "sql_condition": "ELSE",
+                    "label_for_charts": "Other",
+                    "m_probability": 0.22451147362939364,
+                    "u_probability": 0.9866707577029907,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                }
+            ],
+            "comparison_description": "CustomComparison"
+        },
+        {
+            "output_column_name": "dob",
+            "comparison_levels": [
+                {
+                    "sql_condition": "try_strptime(\"dob_l\", '%Y-%m-%d') IS NULL OR try_strptime(\"dob_r\", '%Y-%m-%d') IS NULL",
+                    "label_for_charts": "transformed dob is NULL",
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "is_null_level": true
+                },
+                {
+                    "sql_condition": "\"dob_l\" = \"dob_r\"",
+                    "label_for_charts": "Exact match on date of birth",
+                    "m_probability": 0.6773773407842153,
+                    "u_probability": 0.002281553489440285,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "damerau_levenshtein(\"dob_l\", \"dob_r\") <= 1",
+                    "label_for_charts": "DamerauLevenshtein distance <= 1",
+                    "m_probability": 0.27343725403350416,
+                    "u_probability": 0.02216363557642169,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "ABS(EPOCH(try_strptime(\"dob_l\", '%Y-%m-%d')) - EPOCH(try_strptime(\"dob_r\", '%Y-%m-%d'))) <= 2629800.0",
+                    "label_for_charts": "Abs date difference <= 1 month",
+                    "m_probability": 0.002702789850979514,
+                    "u_probability": 0.002235432977483778,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "ABS(EPOCH(try_strptime(\"dob_l\", '%Y-%m-%d')) - EPOCH(try_strptime(\"dob_r\", '%Y-%m-%d'))) <= 31557600.0",
+                    "label_for_charts": "Abs date difference <= 1 year",
+                    "m_probability": 0.0065244966508642335,
+                    "u_probability": 0.031153370468189084,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "ABS(EPOCH(try_strptime(\"dob_l\", '%Y-%m-%d')) - EPOCH(try_strptime(\"dob_r\", '%Y-%m-%d'))) <= 315576000.0",
+                    "label_for_charts": "Abs date difference <= 10 year",
+                    "m_probability": 0.02959138161239501,
+                    "u_probability": 0.23566790972427465,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "ELSE",
+                    "label_for_charts": "All other comparisons",
+                    "m_probability": 0.010366737068041816,
+                    "u_probability": 0.7064980977641905,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                }
+            ],
+            "comparison_description": "DateOfBirthComparison"
+        },
+        {
+            "output_column_name": "postcode_fake",
+            "comparison_levels": [
+                {
+                    "sql_condition": "\"postcode_fake_l\" IS NULL OR \"postcode_fake_r\" IS NULL",
+                    "label_for_charts": "postcode_fake is NULL",
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "is_null_level": true
+                },
+                {
+                    "sql_condition": "\"postcode_fake_l\" = \"postcode_fake_r\"",
+                    "label_for_charts": "Exact match on full postcode",
+                    "m_probability": 0.6719796665624067,
+                    "u_probability": 0.00014511424753712866,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "NULLIF(regexp_extract(\"postcode_fake_l\", '^[A-Za-z]{1,2}[0-9][A-Za-z0-9]? [0-9]', 0), '') = NULLIF(regexp_extract(\"postcode_fake_r\", '^[A-Za-z]{1,2}[0-9][A-Za-z0-9]? [0-9]', 0), '')",
+                    "label_for_charts": "Exact match on sector",
+                    "m_probability": 0.0932937526528991,
+                    "u_probability": 0.00028336390470671435,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "NULLIF(regexp_extract(\"postcode_fake_l\", '^[A-Za-z]{1,2}[0-9][A-Za-z0-9]?', 0), '') = NULLIF(regexp_extract(\"postcode_fake_r\", '^[A-Za-z]{1,2}[0-9][A-Za-z0-9]?', 0), '')",
+                    "label_for_charts": "Exact match on district",
+                    "m_probability": 0.04271514751698253,
+                    "u_probability": 0.0005462936799472544,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "NULLIF(regexp_extract(\"postcode_fake_l\", '^[A-Za-z]{1,2}', 0), '') = NULLIF(regexp_extract(\"postcode_fake_r\", '^[A-Za-z]{1,2}', 0), '')",
+                    "label_for_charts": "Exact match on area",
+                    "m_probability": 0.1028510530521491,
+                    "u_probability": 0.010938964213134356,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                },
+                {
+                    "sql_condition": "ELSE",
+                    "label_for_charts": "All other comparisons",
+                    "m_probability": 0.08916038021556247,
+                    "u_probability": 0.9880862639546746,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                }
+            ],
+            "comparison_description": "PostcodeComparison"
+        },
+        {
+            "output_column_name": "birth_place",
+            "comparison_levels": [
+                {
+                    "sql_condition": "\"birth_place_l\" IS NULL OR \"birth_place_r\" IS NULL",
+                    "label_for_charts": "birth_place is NULL",
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "is_null_level": true
+                },
+                {
+                    "sql_condition": "\"birth_place_l\" = \"birth_place_r\"",
+                    "label_for_charts": "Exact match on birth_place",
+                    "m_probability": 0.8490646896938654,
+                    "u_probability": 0.0051834449950424934,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "tf_adjustment_column": "birth_place",
+                    "tf_adjustment_weight": 1.0
+                },
+                {
+                    "sql_condition": "ELSE",
+                    "label_for_charts": "All other comparisons",
+                    "m_probability": 0.1509353103061346,
+                    "u_probability": 0.9948165550049575,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                }
+            ],
+            "comparison_description": "ExactMatch"
+        },
+        {
+            "output_column_name": "occupation",
+            "comparison_levels": [
+                {
+                    "sql_condition": "\"occupation_l\" IS NULL OR \"occupation_r\" IS NULL",
+                    "label_for_charts": "occupation is NULL",
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "is_null_level": true
+                },
+                {
+                    "sql_condition": "\"occupation_l\" = \"occupation_r\"",
+                    "label_for_charts": "Exact match on occupation",
+                    "m_probability": 0.886289297429368,
+                    "u_probability": 0.03732937410852058,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false,
+                    "tf_adjustment_column": "occupation",
+                    "tf_adjustment_weight": 1.0
+                },
+                {
+                    "sql_condition": "ELSE",
+                    "label_for_charts": "All other comparisons",
+                    "m_probability": 0.11371070257063208,
+                    "u_probability": 0.9626706258914794,
+                    "fix_m_probability": false,
+                    "fix_u_probability": false
+                }
+            ],
+            "comparison_description": "ExactMatch"
+        }
+    ]
+}

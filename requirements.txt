@@ -1,0 +1,8 @@
+# Versions used to produce the v5 results (23 November 2026). Python 3.11+.
+splink==4.0.17
+duckdb==2.0.1
+pandas==3.0.5
+numpy==2.5.3
+pyarrow==26.0.1
+matplotlib==3.11.2
+tabulate>=0.9
