@@ -5,7 +5,7 @@ Inputs: results/*.csv and *.json from steps 1-6.
 Outputs:
   results/tables.md              Tables 2-6 and Supplementary Tables S1-S9 (numbered in order of first citation)
   results/facts.json             every number quoted in the text, already rounded as printed
-  figures/fig1_examination       Figure 1: match rate by band x ambiguity; perplexity by true duplicates
+  figures/fig1_examination       Figure 1: true-match proportion by band x ambiguity; perplexity by true duplicates
   figures/fig2_design_comparison Figure 2: RMSE of each design relative to current practice
   figures/fig3_reviewer_error    Figure 3: RMSE of estimated precision by budget, with and without reviewer error
   figures/figS2_estimator_check  Supplementary Figure S2: design-weighted vs pooled estimates
@@ -83,12 +83,12 @@ def main():
     bt = pd.read_csv(RESULTS / "bands_and_strata.csv")
     t2 = pd.DataFrame({"Match score band": bt.band, "N pairs": bt.pairs.map("{:,}".format),
                        "Mean probability": bt.mean_probability.map("{:.3f}".format),
-                       "True match rate (%)": (100 * bt.true_match_rate).map("{:.2f}".format),
+                       "True-match proportion (%)": (100 * bt.true_match_rate).map("{:.2f}".format),
                        "N band × pattern strata": bt.band_x_pattern_strata.map("{:,}".format),
                        "Median size, band × pattern": bt.median_pairs_band_x_pattern.map("{:.0f}".format),
                        "N band × pattern × ambiguity strata": bt.band_x_pattern_x_ambiguity_strata.map("{:,}".format),
                        "Median size, band × pattern × ambiguity": bt.median_pairs_band_x_pattern_x_ambiguity.map("{:.0f}".format)})
-    T.append("## Table 2. Score bands: size, mean model probability, true match rate, and number and median size of strata\n\n" + md(t2))
+    T.append("## Table 2. Score bands: size, mean model probability, true-match proportion, and number and median size of strata\n\n" + md(t2))
     for _, r in bt.iterrows():
         F[f"band{int(r.band)}_rate"] = pct(r.true_match_rate); F[f"band{int(r.band)}_prob"] = f"{r.mean_probability:.2f}"
     tba = pd.read_csv(RESULTS / "truth_by_band_and_ambiguity.csv")
@@ -110,12 +110,12 @@ def main():
             for b in BL:
                 F[f"se_{'prop' if al_ == 'proportional' else 'ney'}_{key}_{b}"] = fmt(h.loc[b, "se_pp"])
             F[f"R_{key}"] = f"{100 * h.within_band_variance_explained.iloc[0]:.1f}"
-    T.append("## Table 3. Within-band variance in match status explained by each set of strata, and standard error (pp) of the overall match rate under proportional and Neyman allocation\n\n" + md(pd.DataFrame(rows)))
+    T.append("## Table 3. Within-band variance in match status explained by each set of strata, and standard error (pp) of the overall true-match proportion under proportional and Neyman allocation\n\n" + md(pd.DataFrame(rows)))
 
     # --- Table 4: true values and RMSE, current practice vs band x pattern --------------------------------
     rows = []
-    for est, lab, tcol in [("mr", "Overall match rate", "mr_true"), ("P0.5", "Precision (threshold 0.5)", "P0.5_true"),
-                           ("R0.5", "Recall (threshold 0.5)", "R0.5_true"), ("hi", "Match rate, most ambiguous level", "hi_true")]:
+    for est, lab, tcol in [("mr", "Overall true-match proportion", "mr_true"), ("P0.5", "Precision (threshold 0.5)", "P0.5_true"),
+                           ("R0.5", "Recall (threshold 0.5)", "R0.5_true"), ("hi", "True-match proportion, most ambiguous level", "hi_true")]:
         for dsg, dl in [("PROP-B", "Current practice"), ("PROP-BP", "Band × pattern")]:
             rows.append({"Estimand": lab if dsg == "PROP-B" else "", "True value (%)": fmt(v("PROP-B", "1000", tcol), 1) if dsg == "PROP-B" else "",
                          "Design": dl, **{BT[b]: fmt(v(dsg, b, f"{est}_rmse")) for b in BL}})
@@ -137,7 +137,7 @@ def main():
                 r[f"Other allocation, {BT[b]}"] = (fmt(v(OTHER[d], b, col)) + (" ᵃ" if d == "PROP-AF" else " ᵇ")) if d in OTHER else "–"
             rows.append(r)
         return pd.DataFrame(rows)
-    T.append("## Table 5. RMSE (pp) of the estimated overall match rate, 300 replicates\n\n" + md(grid("mr_rmse")) +
+    T.append("## Table 5. RMSE (pp) of the estimated overall true-match proportion, 300 replicates\n\n" + md(grid("mr_rmse")) +
              "\n\nᵃ Equal budget per ambiguity level. ᵇ Target margins of error (Equation 6).")
     T.append("## Table 6. RMSE (pp) of estimated precision and recall (threshold 0.5), 300 replicates\n\n**Precision**\n\n" +
              md(grid("P0.5_rmse")) + "\n\n**Recall**\n\n" + md(grid("R0.5_rmse")))
@@ -165,11 +165,11 @@ def main():
         "Sharing their values (%)": (100 * sig.ambiguous_share).map("{:.1f}".format),
         "Largest group": sig.largest_group,
         "Shared values with more than one person (%)": (100 * sig.shared_signatures_with_more_than_one_person).map("{:.1f}".format)})))
-    for col, name in [("mr_rmse", "S5a. RMSE (pp), overall match rate"), ("P0.5_rmse", "S5b. RMSE (pp), precision (0.5)"),
+    for col, name in [("mr_rmse", "S5a. RMSE (pp), overall true-match proportion"), ("P0.5_rmse", "S5b. RMSE (pp), precision (0.5)"),
                       ("R0.5_rmse", "S5c. RMSE (pp), recall (0.5)"), ("hi_rmse", "S5d. RMSE (pp), most ambiguous level"),
                       ("P0.9_rmse", "S5e. RMSE (pp), precision (0.9)"), ("R0.9_rmse", "S5f. RMSE (pp), recall (0.9)"),
-                      ("mr_bias", "S4a. Bias (pp), overall match rate"), ("P0.5_bias", "S4b. Bias (pp), precision (0.5)"),
-                      ("R0.5_bias", "S4c. Bias (pp), recall (0.5)"), ("mr_cov", "S8a. Coverage, overall match rate"),
+                      ("mr_bias", "S4a. Bias (pp), overall true-match proportion"), ("P0.5_bias", "S4b. Bias (pp), precision (0.5)"),
+                      ("R0.5_bias", "S4c. Bias (pp), recall (0.5)"), ("mr_cov", "S8a. Coverage, overall true-match proportion"),
                       ("P0.5_cov", "S8b. Coverage, precision (0.5)"), ("R0.5_cov", "S8c. Coverage, recall (0.5)")]:
         t = cmp_.pivot_table(index="design", columns="budget_label", values=col)[BL].reindex(dz.DESIGNS)
         t = t.map(lambda x: f"{x:.2f}" if "cov" in col else fmt(x))
@@ -185,14 +185,14 @@ def main():
     s5 = pd.concat([base, sc]).sort_values(["budget_label", "design", "config"])
     T.append("## Supplementary Table S7. Maximum number of strata: RMSE (pp)\n\n" + md(pd.DataFrame({
         "Budget": s5.budget_label.map(BT), "Design": s5.design.map(dz.LABELS), "Max. strata": s5.config, "Strata": s5.strata,
-        "Match rate": s5.mr_rmse.map(fmt), "Precision": s5["P0.5_rmse"].map(fmt), "Recall": s5["R0.5_rmse"].map(fmt)})))
+        "True-match proportion": s5.mr_rmse.map(fmt), "Precision": s5["P0.5_rmse"].map(fmt), "Recall": s5["R0.5_rmse"].map(fmt)})))
     for _, r in s5.iterrows():
         F[f"cap_{r.design}_{r.budget_label}_{r.config.split()[-2] if 'default' in r.config else r.config.split()[-1]}_mr"] = fmt(r.mr_rmse)
         F[f"cap_{r.design}_{r.budget_label}_{r.config.split()[-2] if 'default' in r.config else r.config.split()[-1]}_strata"] = f"{int(r.strata):,}"
     re_ = sens[sens.group == "reviewer error"]
     T.append("## Supplementary Table S9. Reviewer error: bias (pp) and coverage of 95% intervals\n\n" + md(pd.DataFrame({
         "Budget": re_.budget_label.map(BT), "Design": re_.design.map(dz.LABELS), "Reviewer error": re_.config,
-        "MR bias": re_.mr_bias.map(lambda x: fmt(x, 2)), "P bias": re_["P0.5_bias"].map(lambda x: fmt(x, 2)),
+        "Bias, true-match proportion": re_.mr_bias.map(lambda x: fmt(x, 2)), "P bias": re_["P0.5_bias"].map(lambda x: fmt(x, 2)),
         "R bias": re_["R0.5_bias"].map(lambda x: fmt(x, 2)), "P cov.": re_["P0.5_cov"].map("{:.2f}".format),
         "R cov.": re_["R0.5_cov"].map("{:.2f}".format)})))
     for cfg, k in [("5% uniform", "u"), ("5%, x3 in most ambiguous", "x3")]:
@@ -213,7 +213,7 @@ def main():
         F[f"amb{k}_fmr_acc"] = pct(abl.loc[k, "false_match_rate_accepted"]); F[f"amb{k}_share_missed"] = f"{100 * abl.loc[k, 'share_of_missed_matches']:.0f}"
         F[f"amb{k}_share_false"] = f"{100 * abl.loc[k, 'share_of_false_matches']:.0f}"
     T.append("## Supplementary Table S3. Ambiguity levels: match status, calibration and linkage errors\n\n" + md(pd.DataFrame({
-        "Level": abl.index, "Pairs": abl.pairs.map("{:,.0f}".format), "True match rate (%)": (100 * abl.true_match_rate).map("{:.1f}".format),
+        "Level": abl.index, "Pairs": abl.pairs.map("{:,.0f}".format), "True-match proportion (%)": (100 * abl.true_match_rate).map("{:.1f}".format),
         "Mean probability (%)": (100 * abl.mean_probability).map("{:.1f}".format),
         "False-match rate among accepted (%)": (100 * abl.false_match_rate_accepted).map(lambda x: "–" if np.isnan(x) else f"{x:.1f}"),
         "Share of all false matches (%)": (100 * abl.share_of_false_matches).map("{:.0f}".format),
@@ -242,8 +242,8 @@ def figures(cmp_, sens):
     for lev, col, lab in [(1, "#86b6ef", "Level 1 (least ambiguous)"), (2, BLUE, "Level 2"), (3, "#104281", "Level 3 (most ambiguous)")]:
         s = tba[(tba.a == lev) & (tba.pairs >= 100)]
         a.plot(s.band, 100 * s.true_match_rate, "-o", color=col, lw=2, ms=5, label=lab, mec="#fcfcfb", mew=1)
-    a.set_xticks(range(1, 11)); a.set_xlabel("Score band"); a.set_ylabel("True match rate (%)")
-    a.set_title("(a) True match rate by score band and ambiguity level", loc="left"); a.legend(fontsize=7.5)
+    a.set_xticks(range(1, 11)); a.set_xlabel("Score band"); a.set_ylabel("True-match proportion (%)")
+    a.set_title("(a) True-match proportion by score band and ambiguity level", loc="left"); a.legend(fontsize=7.5)
     a.grid(color=GRID, lw=0.6); a.set_axisbelow(True)
     lab = [str(int(x)) if x < 6 else "6+" for x in pp.true_candidates_capped]
     b.bar(lab, pp.median_perplexity, color=BLUE, width=0.7)
@@ -255,7 +255,7 @@ def figures(cmp_, sens):
     fig, axes = plt.subplots(1, 4, figsize=(12, 4.6), sharey=True)
     for ax, bl in zip(axes, BL):
         for i, d in enumerate(rows):
-            for j, (m, col, lab) in enumerate([("mr", BLUE, "Match rate"), ("P0.5", ORANGE, "Precision"), ("R0.5", AQUA, "Recall")]):
+            for j, (m, col, lab) in enumerate([("mr", BLUE, "True-match proportion"), ("P0.5", ORANGE, "Precision"), ("R0.5", AQUA, "Recall")]):
                 val = C.loc[(d, bl), f"{m}_rmse"] / C.loc[("PROP-B", bl), f"{m}_rmse"]
                 ax.barh(i + (j - 1) * 0.26, val, height=0.24, color=col, label=lab if (i == 0 and bl == BL[0]) else None)
             if d in NEY:
@@ -263,7 +263,7 @@ def figures(cmp_, sens):
                 ax.plot([nv, nv], [i - 0.4, i - 0.12], color=INK, lw=2)
         ax.axvline(1, ls="--", color=MUTED, lw=0.8); ax.set_title(BT[bl]); ax.grid(axis="x", color=GRID, lw=0.6); ax.set_axisbelow(True)
     axes[0].set_yticks(range(len(rows)), [dz.LABELS[d] for d in rows]); axes[0].invert_yaxis()
-    fig.supxlabel("RMSE relative to current practice (proportional within score bands; 1 = same). Black tick: Neyman ceiling, match rate", fontsize=8.5)
+    fig.supxlabel("RMSE relative to current practice (proportional within score bands; 1 = same). Black tick: Neyman ceiling, true-match proportion", fontsize=8.5)
     fig.legend(loc="upper center", ncol=3, bbox_to_anchor=(0.6, 1.0)); fig.tight_layout(rect=(0, 0, 1, 0.94))
     save(fig, "fig2_design_comparison")
     # Figure 3: reviewer error does not shrink with the budget ---------------------------------------------------

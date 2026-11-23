@@ -3,7 +3,7 @@ model_check.py -- Step 1b. Sense-check the fitted linkage model.
 
 Outputs:
   results/model_parameters.csv           m, u and match weight for every comparison level
-  results/calibration_by_band.csv        mean model probability and true match rate by score band
+  results/calibration_by_band.csv        mean model probability and true-match proportion by score band
   results/calibration_band_ambiguity.csv the same by band x ambiguity level
   results/band6_top_patterns.csv         largest agreement patterns in the least-calibrated band
   figures/figS1_model_check.(pdf|png)    (a) match weights; (b) calibration by score band
@@ -78,7 +78,7 @@ def main():
                    textcoords="offset points", fontsize=7, color=MUTED)
     b.plot([0, 1], [0, 1], ls="--", color=MUTED, lw=0.8)
     b.set_xlim(-0.02, 1.02); b.set_ylim(-0.02, 1.02)
-    b.set_xlabel("Mean model match probability in score band"); b.set_ylabel("True match rate in score band")
+    b.set_xlabel("Mean model match probability in score band"); b.set_ylabel("True-match proportion in score band")
     b.set_title("(b) Calibration by score band (labels: band)", loc="left", color=INK)
     b.grid(color=GRID, lw=0.6); b.set_axisbelow(True)
     fig.tight_layout()
