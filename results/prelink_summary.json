@@ -1,0 +1,23 @@
+{
+ "records": 50578,
+ "people": 5156,
+ "median_records_per_person": 9.0,
+ "share_records_in_clusters_6plus": 0.8786626596543952,
+ "candidate_pairs": 450741,
+ "true_pairs_total": 303961,
+ "true_pairs_in_candidates": 203544,
+ "blocking_recall": 0.6696385391546942,
+ "candidate_match_rate": 0.4515764041877708,
+ "agreement_patterns": 1496,
+ "gender_missing_share_of_pairs": 0.15694378811778825,
+ "median_stratum_bp": 13.0,
+ "median_stratum_bpa": 8.0,
+ "share_strata_lt10_bp": 0.44853201273434734,
+ "share_strata_lt10_bpa": 0.5319378174542096,
+ "share_bp_strata_split_by_ambiguity": 0.7569862044570216,
+ "patterns_in_more_than_one_band": 920,
+ "share_pairs_in_multiband_patterns": 0.9015776244007091,
+ "band_x_pattern_strata": 2827,
+ "band_x_pattern_x_ambiguity_strata": 6497,
+ "spearman_perplexity_vs_true_duplicates": 0.6023494555555672
+}
